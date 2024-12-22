@@ -12,18 +12,22 @@ const features = [
 export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12 space-y-12">
-      <div className="max-w-3xl mx-auto text-center space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-gray-900">
-          Bandicute 
-        </h1>
-        <p className="text-sm text-gray-500">
-          (반디 기웃 기웃 ㅋ)
-        </p>
-        <p className="text-xl text-gray-600 mt-6 leading-relaxed">
-          친구들의 티스토리 블로그 최신 아티클을 요약하고, <br className="my-2" /> 
-          GitHub Repository에 자동으로 공유하세요!
-        </p>
-        <HeroButton />
+      <div className="max-w-3xl mx-auto text-center">
+        <div className="space-y-4">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-gray-900">
+            Bandicute 
+          </h1>
+          <p className="text-sm text-gray-500">
+            (반디 기웃 기웃 ㅋ)
+          </p>
+          <p className="text-xl text-gray-600 mt-6 leading-relaxed">
+            친구들의 티스토리 블로그 최신 아티클을 요약하고, <br className="my-2" /> 
+            GitHub Repository에 자동으로 공유하세요!
+          </p>
+        </div>
+        <div className="mt-12">
+          <HeroButton />
+        </div>
       </div>
 
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
