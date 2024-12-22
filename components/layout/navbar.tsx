@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/store/auth';
@@ -8,15 +7,19 @@ import { supabase } from '@/lib/supabase/client';
 import { useToast } from "@/hooks/use-toast";
 
 export function Navbar() {
-  const { user, member } = useAuth();
+  const { member } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
+  const reset = useAuth(state => state.reset);
 
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
+      // 먼저 상태를 리셋
+      reset();
+
       toast({
         title: "로그아웃 성공",
         description: "안녕히 가세요!",

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from '@/store/auth';
 
 interface AuthFormProps {
   type: 'signin' | 'signup';
@@ -17,11 +18,11 @@ export function AuthForm({ type }: AuthFormProps) {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
+  const fetchUser = useAuth(state => state.fetchUser);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // 이미 처리 중이면 중복 요청 방지
     if (loading) return;
     
     setLoading(true);
@@ -29,10 +30,8 @@ export function AuthForm({ type }: AuthFormProps) {
 
     try {
       if (type === 'signin') {
-        // 현재 세션 확인
         const { data: { session } } = await supabase.auth.getSession();
         
-        // 세션이 있으면 바로 리다이렉트
         if (session) {
           toast({
             title: "이미 로그인되어 있습니다",
@@ -42,8 +41,7 @@ export function AuthForm({ type }: AuthFormProps) {
           return;
         }
 
-        // 로그인 시도
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -58,6 +56,9 @@ export function AuthForm({ type }: AuthFormProps) {
           throw error;
         }
 
+        // 로그인 성공 시 사용자 정보 새로고침
+        await fetchUser();
+
         toast({
           title: "로그인 성공",
           description: "환영합니다!",
@@ -66,7 +67,6 @@ export function AuthForm({ type }: AuthFormProps) {
         router.replace('/');
         return;  
       } else {
-        // 회원가입 처리
         const { data, error: authError } = await supabase.auth.signUp({
           email,
           password,
@@ -101,7 +101,7 @@ export function AuthForm({ type }: AuthFormProps) {
       
       toast({
         variant: "destructive",
-        title: "오류 발생",
+        title: type === 'signin' ? "로그인 실패" : "회원가입 실패",
         description: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다',
       });
     } finally {
@@ -110,64 +110,69 @@ export function AuthForm({ type }: AuthFormProps) {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            이메일
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={loading}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:opacity-50"
-          />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          이메일
+        </label>
+        <input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          placeholder="name@example.com"
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          비밀번호
+        </label>
+        <input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          required
+        />
+      </div>
+      {error && (
+        <div className="text-sm text-red-500">
+          {error}
         </div>
-
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-            비밀번호
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            disabled={loading}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:opacity-50"
-          />
-        </div>
-
-        {error && (
-          <div className="text-sm text-red-600">
-            {error}
-          </div>
+      )}
+      <button
+        type="submit"
+        disabled={loading}
+        className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+      >
+        {loading ? (
+          <span>처리 중...</span>
+        ) : type === 'signin' ? (
+          <span>로그인</span>
+        ) : (
+          <span>회원가입</span>
         )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-        >
-          {loading ? '처리 중...' : type === 'signin' ? '로그인' : '회원가입'}
-        </button>
-
-        <div className="text-sm text-center">
-          {type === 'signin' ? (
-            <Link href="/auth/signup" className="text-indigo-600 hover:text-indigo-500">
-              계정이 없으신가요? 회원가입
+      </button>
+      <div className="text-center text-sm">
+        {type === 'signin' ? (
+          <>
+            계정이 없으신가요?{' '}
+            <Link href="/auth/signup" className="font-medium text-primary hover:underline">
+              회원가입
             </Link>
-          ) : (
-            <Link href="/auth/signin" className="text-indigo-600 hover:text-indigo-500">
-              이미 계정이 있으신가요? 로그인
+          </>
+        ) : (
+          <>
+            이미 계정이 있으신가요?{' '}
+            <Link href="/auth/signin" className="font-medium text-primary hover:underline">
+              로그인
             </Link>
-          )}
-        </div>
-      </form>
-    </div>
+          </>
+        )}
+      </div>
+    </form>
   );
 }

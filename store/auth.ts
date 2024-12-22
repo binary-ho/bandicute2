@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabase/client';
-import type { AuthState, Member } from '@/types/auth';
+import type { AuthState } from '@/types/auth';
 
-export const useAuth = create<AuthState>((set, get) => ({
+export const useAuth = create<AuthState>((set) => ({
   user: null,
   member: null,
   loading: true,
@@ -10,8 +10,8 @@ export const useAuth = create<AuthState>((set, get) => ({
   initialized: false,
 
   fetchUser: async () => {
-    const state = get();
-    if (state.initialized && !state.loading) return;
+    // 이미 초기화되었고 로딩 중이 아닌 경우에도 강제로 새로고침
+    // if (state.initialized && !state.loading) return;
 
     try {
       set({ loading: true, error: null });
@@ -87,7 +87,6 @@ export const useAuth = create<AuthState>((set, get) => ({
         }
       } catch (error) {
         console.error('Member fetch/create error:', error);
-        // member 관련 에러는 user 인증 자체를 무효화하지 않음
         set({ 
           loading: false,
           error: error instanceof Error ? error : new Error('회원 정보를 가져오는데 실패했습니다')
@@ -98,18 +97,20 @@ export const useAuth = create<AuthState>((set, get) => ({
       set({ 
         user: null,
         member: null,
-        error: error instanceof Error ? error : new Error('인증 오류가 발생했습니다'),
         loading: false,
-        initialized: true
+        initialized: true,
+        error: error instanceof Error ? error : new Error('인증 오류가 발생했습니다')
       });
     }
   },
 
-  reset: () => set({
-    user: null,
-    member: null,
-    loading: false,
-    error: null,
-    initialized: false
-  })
+  reset: () => {
+    set({
+      user: null,
+      member: null,
+      loading: false,
+      error: null,
+      initialized: true
+    });
+  }
 }));
