@@ -15,7 +15,7 @@ export function RootLayoutClient({ children }: { children: React.ReactNode }) {
     // fetchUser();
 
     // Auth 상태 변경 구독
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         fetchUser();
       } else if (event === 'SIGNED_OUT') {

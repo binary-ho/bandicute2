@@ -20,7 +20,7 @@ export async function parseBlogPost(blogUrl: string): Promise<BlogPost> {
     // 최신 글 가져오기
     const latestPost = feed.items[0];
     if (!latestPost) {
-      throw new Error('No posts found in RSS feed');
+      throw new Error('RSS 피드에서 포스트를 찾을 수 없습니다.');
     }
 
     return {
@@ -30,7 +30,11 @@ export async function parseBlogPost(blogUrl: string): Promise<BlogPost> {
       publishedAt: latestPost.pubDate || new Date().toISOString(),
     };
   } catch (error) {
-    console.error('Failed to parse blog post:', error);
-    throw new Error(`Failed to parse blog post: ${error.message}`);
+    console.error('블로그 포스트 파싱 실패:', error);
+    
+    if (error instanceof Error) {
+      throw new Error(`블로그 포스트 파싱 실패: ${error.message}`);
+    }
+    throw new Error('블로그 포스트 파싱 중 알 수 없는 오류가 발생했습니다.');
   }
 }

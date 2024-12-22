@@ -1,5 +1,5 @@
 import { supabase } from '../supabase/client';
-import type { Member, Study, StudyMember } from '@/types';
+import type { Member } from '@/types';
 
 export class AuthorizationError extends Error {
   constructor(message: string) {

@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { GitHubRepositoryService } from '@/lib/github/repository-service';
 import { BlogSummaryService } from '@/lib/blog-summary/service';
 import { GitHubPRService } from '@/lib/github/pr-service';
+import { OpenAIService } from '@/lib/openai/service';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,7 +72,8 @@ export async function POST(request: Request) {
 
     // 스터디 생성 후 블로그 체크 실행
     const githubPRService = new GitHubPRService();
-    const blogSummaryService = new BlogSummaryService(githubPRService);
+    const openAIService = new OpenAIService();
+    const blogSummaryService = new BlogSummaryService(githubPRService, openAIService);
 
     // 생성자의 블로그 정보 가져오기
     const { data: member } = await supabase
@@ -82,7 +84,7 @@ export async function POST(request: Request) {
 
     if (member?.tistory_blog) {
       try {
-        await blogSummaryService.processNewBlogPost(member.tistory_blog, member);
+        await blogSummaryService.processNewBlogPost(member.tistory_blog, member, study);
       } catch (error) {
         console.error('Error processing blog post:', error);
         // 블로그 처리 실패해도 스터디 생성은 성공으로 처리

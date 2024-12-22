@@ -56,7 +56,7 @@ export async function GET(
 
     // 접근 권한 확인 (스터디 멤버인지)
     const isMember = study.study_members.some(
-      (member) => member.member_id === user.id
+      (member: { member_id: string; }) => member.member_id === user.id
     );
 
     if (!isMember) {

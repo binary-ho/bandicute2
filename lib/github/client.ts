@@ -1,4 +1,5 @@
 import { Octokit } from 'octokit';
+import { RequestError } from '@octokit/request-error';
 
 const githubToken = process.env.GITHUB_ACCESS_TOKEN!;
 
@@ -13,7 +14,10 @@ interface CreatePRParams {
   body: string;
   head: string;
   base?: string;
-  reviewers?: string[];
+}
+
+function isRequestError(error: unknown): error is RequestError {
+  return error instanceof Error && 'status' in error;
 }
 
 export async function createPullRequest({
@@ -23,7 +27,6 @@ export async function createPullRequest({
   body,
   head,
   base = 'main',
-  reviewers,
 }: CreatePRParams) {
   try {
     const { data: pr } = await octokit.rest.pulls.create({
@@ -35,20 +38,21 @@ export async function createPullRequest({
       base,
     });
 
-    // TODO: 리뷰어 추가 기능 임시 비활성화
-    // if (reviewers?.length) {
-    //   await octokit.rest.pulls.requestReviewers({
-    //     owner,
-    //     repo,
-    //     pull_number: pr.number,
-    //     reviewers,
-    //   });
-    // }
-
     return pr.html_url;
   } catch (error) {
     console.error('Failed to create pull request:', error);
-    throw error;
+    if (isRequestError(error)) {
+      if (error.status === 401) {
+        throw new Error('GitHub 인증에 실패했습니다. GITHUB_ACCESS_TOKEN이 올바르게 설정되어 있는지 확인해주세요.');
+      }
+      if (error.status === 404) {
+        throw new Error(`GitHub 레포지토리를 찾을 수 없습니다: ${owner}/${repo}`);
+      }
+      if (error.status === 422) {
+        throw new Error('PR 생성에 실패했습니다. 브랜치 정보를 확인해주세요.');
+      }
+    }
+    throw new Error('PR 생성 중 오류가 발생했습니다.');
   }
 }
 
@@ -61,7 +65,15 @@ export async function forkRepository(owner: string, repo: string) {
     return fork;
   } catch (error) {
     console.error('Failed to fork repository:', error);
-    throw error;
+    if (isRequestError(error)) {
+      if (error.status === 401) {
+        throw new Error('GitHub 인증에 실패했습니다. GITHUB_ACCESS_TOKEN이 올바르게 설정되어 있는지 확인해주세요.');
+      }
+      if (error.status === 404) {
+        throw new Error(`GitHub 레포지토리를 찾을 수 없습니다: ${owner}/${repo}`);
+      }
+    }
+    throw new Error('레포지토리 포크 중 오류가 발생했습니다.');
   }
 }
 
@@ -95,7 +107,18 @@ export async function createOrUpdateFile({
     return data;
   } catch (error) {
     console.error('Failed to create or update file:', error);
-    throw error;
+    if (isRequestError(error)) {
+      if (error.status === 401) {
+        throw new Error('GitHub 인증에 실패했습니다. GITHUB_ACCESS_TOKEN이 올바르게 설정되어 있는지 확인해주세요.');
+      }
+      if (error.status === 404) {
+        throw new Error(`GitHub 레포지토리를 찾을 수 없습니다: ${owner}/${repo}`);
+      }
+      if (error.status === 422) {
+        throw new Error('파일 생성/수정에 실패했습니다. 브랜치와 파일 정보를 확인해주세요.');
+      }
+    }
+    throw new Error('파일 생성/수정 중 오류가 발생했습니다.');
   }
 }
 
@@ -108,10 +131,10 @@ export async function getBranch(owner: string, repo: string, branch: string) {
     });
     return data;
   } catch (error) {
-    if ((error as any).status === 404) {
+    if (isRequestError(error) && error.status === 404) {
       return null;
     }
-    throw error;
+    throw new Error('브랜치 정보 조회 중 오류가 발생했습니다.');
   }
 }
 
@@ -126,6 +149,17 @@ export async function createBranch(owner: string, repo: string, branch: string, 
     return data;
   } catch (error) {
     console.error('Failed to create branch:', error);
-    throw error;
+    if (isRequestError(error)) {
+      if (error.status === 401) {
+        throw new Error('GitHub 인증에 실패했습니다. GITHUB_ACCESS_TOKEN이 올바르게 설정되어 있는지 확인해주세요.');
+      }
+      if (error.status === 404) {
+        throw new Error(`GitHub 레포지토리를 찾을 수 없습니다: ${owner}/${repo}`);
+      }
+      if (error.status === 422) {
+        throw new Error('브랜치 생성에 실패했습니다. 브랜치 이름과 SHA를 확인해주세요.');
+      }
+    }
+    throw new Error('브랜치 생성 중 오류가 발생했습니다.');
   }
 }

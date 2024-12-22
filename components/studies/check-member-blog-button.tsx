@@ -5,10 +5,9 @@ import { useToast } from "@/hooks/use-toast"
 interface CheckMemberBlogButtonProps {
   studyId: string
   memberId: string
-  onSuccess?: () => void
 }
 
-export function CheckMemberBlogButton({ studyId, memberId, onSuccess }: CheckMemberBlogButtonProps) {
+export function CheckMemberBlogButton({ studyId, memberId }: CheckMemberBlogButtonProps) {
   const { toast } = useToast()
 
   const handleClick = async () => {
@@ -32,8 +31,6 @@ export function CheckMemberBlogButton({ studyId, memberId, onSuccess }: CheckMem
         title: "블로그 확인 완료",
         description: "블로그 포스트를 확인했습니다.",
       })
-
-      onSuccess?.()
     } catch (error) {
       console.error(error)
       toast({

@@ -25,17 +25,12 @@ interface TemplateSection {
 
 interface PRTemplate {
   title: string;
-  body: {
-    sections: TemplateSection[];
-  };
-  variables: string[];
-  description: string;
+  body: TemplateSection[];
 }
 
 interface SummaryPromptTemplate {
   template: string;
   variables: string[];
-  description: string;
 }
 
 export class BlogSummaryService {
@@ -80,7 +75,7 @@ export class BlogSummaryService {
     };
 
     const title = this.replaceTemplateVars(template.title, vars);
-    const sections = template.body.sections.map(section => {
+    const sections = template.body.map(section => {
       if (section.content) {
         section.content = this.replaceTemplateVars(section.content, vars);
       }
@@ -144,7 +139,7 @@ export class BlogSummaryService {
       const summary = await this.openAIService.generateSummary(prompt);
 
       // 4. Create PR
-      const { title: prTitle, body: prBody } = await this.generatePRDescription(parsedPost, member, summary);
+      const { body: prBody } = await this.generatePRDescription(parsedPost, member, summary);
       const prUrl = await this.githubPRService.createPR({
         post: {
           ...parsedPost,
@@ -152,7 +147,6 @@ export class BlogSummaryService {
         },
         study,
         member,
-        title: prTitle,
         description: prBody,
       });
 

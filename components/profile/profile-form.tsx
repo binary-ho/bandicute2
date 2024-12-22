@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import type { Member } from '@/types';
+// import type { Member } from '@/types';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function ProfileForm() {
-  const [member, setMember] = useState<Member | null>(null);
+  // const [member, setMember] = useState<Member | null>(null);
   const [name, setName] = useState('');
   const [tistoryBlog, setTistoryBlog] = useState('');
   const [loading, setLoading] = useState(true);
@@ -40,7 +40,7 @@ export function ProfileForm() {
         if (error) throw error;
 
         if (data) {
-          setMember(data);
+          // setMember(data);
           setName(data.name || '');
           setTistoryBlog(data.tistory_blog || '');
         }

@@ -12,7 +12,6 @@ interface AddMemberButtonProps {
 export function AddMemberButton({ studyId }: AddMemberButtonProps) {
   const [showModal, setShowModal] = useState(false);
   const [email, setEmail] = useState('');
-  const [tistoryBlog, setTistoryBlog] = useState('');
   const [folderPath, setFolderPath] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -34,7 +33,7 @@ export function AddMemberButton({ studyId }: AddMemberButtonProps) {
       }
 
       // 2. 이미 스터디 멤버인지 확인
-      const { data: existingMember, error: existingError } = await supabase
+      const { data: existingMember } = await supabase
         .from('study_members')
         .select('id')
         .eq('study_id', studyId)
@@ -52,7 +51,6 @@ export function AddMemberButton({ studyId }: AddMemberButtonProps) {
         .insert({
           study_id: studyId,
           member_id: members.id,
-          tistory_blog: tistoryBlog,
           folder_path: folderPath,
           is_leader: false,
         });
@@ -93,18 +91,6 @@ export function AddMemberButton({ studyId }: AddMemberButtonProps) {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  티스토리 블로그 URL
-                </label>
-                <input
-                  type="url"
-                  value={tistoryBlog}
-                  onChange={(e) => setTistoryBlog(e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   required
                 />

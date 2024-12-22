@@ -1,5 +1,6 @@
 import { Octokit } from 'octokit';
-import type { BlogPost, Member, Study } from '@/types';
+import type { Member, Study } from '@/types';
+import { RequestError } from '@octokit/request-error';
 
 interface CreatePRParams {
   post: {
@@ -10,7 +11,6 @@ interface CreatePRParams {
   };
   study: Study;
   member: Member;
-  title: string;
   description: string;
 }
 
@@ -37,11 +37,14 @@ export class GitHubPRService {
     throw new Error(`Invalid GitHub repository format: ${repoUrl}`);
   }
 
+  private isRequestError(error: unknown): error is RequestError {
+    return error instanceof Error && 'status' in error;
+  }
+
   async createPR({
     post,
     study,
     member,
-    title,
     description,
   }: CreatePRParams): Promise<string> {
     try {
@@ -67,7 +70,7 @@ export class GitHubPRService {
             repo: fork.name,
           });
           break;
-        } catch (error) {
+        } catch {
           attempts++;
           if (attempts === maxAttempts) {
             throw new Error('Fork creation timeout');
@@ -110,7 +113,7 @@ export class GitHubPRService {
       const { data: pr } = await this.octokit.rest.pulls.create({
         owner,
         repo,
-        title,
+        title: post.title,
         body: description,
         head: `${fork.owner.login}:${branchName}`,
         base: study.branch || defaultBranch.default_branch,
@@ -125,20 +128,28 @@ export class GitHubPRService {
           reviewers: [member.name],
         });
       } catch (error) {
+        // 리뷰어 추가 실패는 치명적이지 않으므로 무시
         console.error('Failed to add reviewer:', error);
       }
 
       return pr.html_url;
     } catch (error) {
       console.error('Failed to create PR:', error);
-      if (error.status === 401) {
-        throw new Error('GitHub 인증에 실패했습니다. GITHUB_ACCESS_TOKEN이 올바르게 설정되어 있는지 확인해주세요.');
-      } else if (error.status === 404) {
-        throw new Error(`GitHub 레포지토리를 찾을 수 없습니다: ${study.github_repo}\n레포지토리 URL을 확인해주세요.`);
-      } else if (error.message === 'Fork creation timeout') {
+
+      if (this.isRequestError(error)) {
+        if (error.status === 401) {
+          throw new Error('GitHub 인증에 실패했습니다. GITHUB_ACCESS_TOKEN이 올바르게 설정되어 있는지 확인해주세요.');
+        }
+        if (error.status === 404) {
+          throw new Error(`GitHub 레포지토리를 찾을 수 없습니다: ${study.github_repo}\n레포지토리 URL을 확인해주세요.`);
+        }
+      }
+
+      if (error instanceof Error && error.message === 'Fork creation timeout') {
         throw new Error('Fork 생성 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.');
       }
-      throw new Error('PR 생성 중 오류가 발생했습니다: ' + (error.message || '알 수 없는 오류'));
+
+      throw new Error('PR 생성 중 오류가 발생했습니다.');
     }
   }
 }
