@@ -5,19 +5,27 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/store/auth';
 import { supabase } from '@/lib/supabase/client';
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { LogOut, User, BookOpen, Github } from 'lucide-react';
+import React from 'react';
+import { features } from '@/config/features';
 
 export function Navbar() {
-  const { member } = useAuth();
+  const { member, fetchUser } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const reset = useAuth(state => state.reset);
+
+  // 컴포넌트 마운트 시 사용자 정보 가져오기
+  React.useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
-      // 먼저 상태를 리셋
       reset();
 
       toast({
@@ -30,54 +38,72 @@ export function Navbar() {
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
-        variant: "destructive",
         title: "로그아웃 실패",
-        description: error instanceof Error ? error.message : '로그아웃 중 오류가 발생했습니다.',
+        description: "다시 시도해주세요.",
+        variant: "destructive",
       });
     }
   };
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center px-4">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
-          <span className="hidden font-bold sm:inline-block">Bandicute</span>
-        </Link>
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-            {/* 검색 기능이 필요하다면 여기에 추가 */}
-          </div>
-          <nav className="flex items-center space-x-4">
-            {member ? (
-              <>
-                <Link
-                  href="/studies"
-                  className="text-sm font-medium hover:text-primary"
-                >
-                  스터디
+    <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/50">
+      <div className="max-w-[1440px] mx-auto flex h-16 items-center px-4">
+        <div className="flex-shrink-0 -ml-2">
+          <Link href="/" className="flex items-center space-x-2">
+            <span className="font-bold text-gray-900">Bandicute</span>
+          </Link>
+        </div>
+
+        <div className="flex flex-1 items-center justify-end">
+          {member ? (
+            <>
+              {/* 스터디 버튼 */}
+              <Button variant="ghost" asChild>
+                <Link href="/studies">
+                  <BookOpen className="mr-2 h-4 w-4 text-gray-600" />
+                  <span className="text-gray-600">스터디</span>
                 </Link>
-                <Link
-                  href="/profile"
-                  className="text-sm font-medium hover:text-primary"
-                >
-                  프로필
+              </Button>
+              {/* 프로필 버튼 */}
+              <Button variant="ghost" asChild>
+                <Link href="/profile">
+                  <User className="mr-2 h-4 w-4 text-gray-600" />
+                  <span className="text-gray-600">프로필</span>
                 </Link>
-                <button
-                  onClick={handleSignOut}
-                  className="text-sm font-medium text-destructive hover:text-destructive/80"
-                >
-                  로그아웃
-                </button>
-              </>
-            ) : (
-              <Link
-                href="/auth/signin"
-                className="text-sm font-medium hover:text-primary"
-              >
-                로그인
+              </Button>
+              {/* 로그아웃 버튼 */}
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                로그아웃
+              </Button>
+              {/* Github 버튼 */}
+              {features.showGithubButton && (
+                <div className="ml-2">
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    className="rounded-full border-gray-300 hover:border-gray-400 hover:bg-gray-100/50 w-8 h-8 p-0" 
+                    asChild
+                  >
+                    <Link 
+                      href={features.githubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center"
+                    >
+                      <Github className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
+            <Button variant="ghost" asChild>
+              <Link href="/auth/signin">
+                <span className="text-gray-600">로그인</span>
               </Link>
-            )}
-          </nav>
+            </Button>
+          )}
         </div>
       </div>
     </nav>

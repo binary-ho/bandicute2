@@ -1,23 +1,24 @@
 import { StudyList } from '@/components/studies/study-list';
 import { CreateStudyButton } from '@/components/studies/create-study-button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export default function StudiesPage() {
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-base font-semibold leading-6 text-gray-900">
-            스터디
-          </h1>
-          <p className="mt-2 text-sm text-gray-700">
-            블로그 요약을 공유할 스터디 목록입니다.
-          </p>
-        </div>
-        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div>
+            <CardTitle className="text-2xl font-bold">스터디</CardTitle>
+            <CardDescription>
+              블로그 요약을 공유할 스터디 목록입니다.
+            </CardDescription>
+          </div>
           <CreateStudyButton />
-        </div>
-      </div>
-      <StudyList />
+        </CardHeader>
+        <CardContent>
+          <StudyList />
+        </CardContent>
+      </Card>
     </div>
   );
 }

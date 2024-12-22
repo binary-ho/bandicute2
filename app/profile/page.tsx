@@ -1,20 +1,17 @@
 import { ProfileForm } from '@/components/profile/profile-form';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function ProfilePage() {
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="py-10">
-        <header>
-          <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900">
-            프로필 설정
-          </h1>
-        </header>
-        <main>
-          <div className="mt-10">
-            <ProfileForm />
-          </div>
-        </main>
-      </div>
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl font-bold">프로필 설정</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ProfileForm />
+        </CardContent>
+      </Card>
     </div>
   );
 }

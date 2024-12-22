@@ -6,6 +6,11 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/store/auth';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2 } from 'lucide-react';
 
 interface AuthFormProps {
   type: 'signin' | 'signup';
@@ -15,74 +20,40 @@ export function AuthForm({ type }: AuthFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
   const fetchUser = useAuth(state => state.fetchUser);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (loading) return;
-    
     setLoading(true);
-    setError(null);
 
     try {
       if (type === 'signin') {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session) {
-          toast({
-            title: "이미 로그인되어 있습니다",
-            description: "메인 페이지로 이동합니다.",
-          });
+          toast({ title: "이미 로그인되어 있습니다", description: "메인 페이지로 이동합니다." });
           router.replace('/');
           return;
         }
 
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-        if (error) {
-          if (error.message.includes('rate limit')) {
-            throw new Error('잠시 후 다시 시도해주세요');
-          }
-          if (error.message.includes('Invalid login credentials')) {
-            throw new Error('이메일 또는 비밀번호가 올바르지 않습니다');
-          }
-          throw error;
-        }
+        if (error) throw error;
 
-        // 로그인 성공 시 사용자 정보 새로고침
         await fetchUser();
-
-        toast({
-          title: "로그인 성공",
-          description: "환영합니다!",
-        });
-        
+        toast({ title: "로그인 성공", description: "환영합니다!" });
         router.replace('/');
-        return;  
       } else {
-        const { data, error: authError } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/signin`,
-          },
+          options: { emailRedirectTo: `${window.location.origin}/auth/signin` },
         });
 
-        if (authError) {
-          if (authError.message.includes('rate limit')) {
-            throw new Error('잠시 후 다시 시도해주세요');
-          }
-          throw authError;
-        }
-        
-        if (!data.user) throw new Error('User not created');
+        if (error) throw error;
 
         toast({
           title: "회원가입 완료",
@@ -93,12 +64,6 @@ export function AuthForm({ type }: AuthFormProps) {
       }
     } catch (error) {
       console.error('Error:', error);
-      setError(
-        error instanceof Error 
-          ? error.message
-          : '알 수 없는 오류가 발생했습니다'
-      );
-      
       toast({
         variant: "destructive",
         title: type === 'signin' ? "로그인 실패" : "회원가입 실패",
@@ -110,69 +75,66 @@ export function AuthForm({ type }: AuthFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-          이메일
-        </label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          placeholder="name@example.com"
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-          비밀번호
-        </label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          required
-        />
-      </div>
-      {error && (
-        <div className="text-sm text-red-500">
-          {error}
-        </div>
-      )}
-      <button
-        type="submit"
-        disabled={loading}
-        className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-      >
-        {loading ? (
-          <span>처리 중...</span>
-        ) : type === 'signin' ? (
-          <span>로그인</span>
-        ) : (
-          <span>회원가입</span>
-        )}
-      </button>
-      <div className="text-center text-sm">
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle>{type === 'signin' ? '로그인' : '회원가입'}</CardTitle>
+        <CardDescription>
+          {type === 'signin' 
+            ? '반디큐트에 오신 것을 환영합니다.' 
+            : '새로운 계정을 만들어 반디큐트를 시작하세요.'}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">이메일</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">비밀번호</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                처리 중...
+              </>
+            ) : type === 'signin' ? '로그인' : '회원가입'}
+          </Button>
+        </form>
+      </CardContent>
+      <CardFooter className="flex justify-center">
         {type === 'signin' ? (
-          <>
+          <p className="text-sm text-muted-foreground">
             계정이 없으신가요?{' '}
             <Link href="/auth/signup" className="font-medium text-primary hover:underline">
               회원가입
             </Link>
-          </>
+          </p>
         ) : (
-          <>
+          <p className="text-sm text-muted-foreground">
             이미 계정이 있으신가요?{' '}
             <Link href="/auth/signin" className="font-medium text-primary hover:underline">
               로그인
             </Link>
-          </>
+          </p>
         )}
-      </div>
-    </form>
+      </CardFooter>
+    </Card>
   );
 }
+
