@@ -4,7 +4,7 @@ import { HeroButton } from '@/components/home/hero-button';
 
 const features = [
   { title: "친구들과 스터디!", icon: Users, description: "친구들을 스터디에 추가하세요." },
-  { title: "열심히 작성한 최신 아티클 파싱", icon: BookOpen, description: "스터디원의 Tistory 블로그 최신 아티클을 자동으로 수집합니다." },
+  { title: "최근에 작성한 아티클 파싱", icon: BookOpen, description: "스터디원의 Tistory 블로그 최신 아티클을 자동으로 수집합니다." },
   { title: "귀여운 반디가 소개글을 써줄게요", icon: BookOpen, description: "(GPT의 힘을 조금 빌려..)" },
   { title: "GitHub PR 자동 생성", icon: GitPullRequest, description: "스터디의 Repository에 요약본을 Push하는 PR을 자동으로 생성합니다." },
 ];

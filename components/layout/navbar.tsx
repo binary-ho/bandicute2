@@ -6,8 +6,9 @@ import { useAuth } from '@/store/auth';
 import { supabase } from '@/lib/supabase/client';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { LogOut, User, BookOpen } from 'lucide-react';
+import { LogOut, User, BookOpen, Github } from 'lucide-react';
 import React from 'react';
+import { features } from '@/config/features';
 
 export function Navbar() {
   const { member, fetchUser } = useAuth();
@@ -71,10 +72,30 @@ export function Navbar() {
                 </Link>
               </Button>
               {/* 로그아웃 버튼 */}
-              <Button variant="ghost" onClick={handleSignOut}>
-                <LogOut className="mr-2 h-4 w-4 text-gray-600" />
-                <span className="text-gray-600">로그아웃</span>
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                로그아웃
               </Button>
+              {/* Github 버튼 */}
+              {features.showGithubButton && (
+                <div className="ml-2">
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    className="rounded-full border-gray-300 hover:border-gray-400 hover:bg-gray-100/50 w-8 h-8 p-0" 
+                    asChild
+                  >
+                    <Link 
+                      href={features.githubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center"
+                    >
+                      <Github className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </>
           ) : (
             <Button variant="ghost" asChild>
