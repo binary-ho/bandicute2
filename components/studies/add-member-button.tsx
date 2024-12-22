@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { Button } from '@/components/ui/button';
+import { UserPlus } from 'lucide-react';
 
 interface AddMemberButtonProps {
   studyId: string;
@@ -69,104 +71,72 @@ export function AddMemberButton({ studyId }: AddMemberButtonProps) {
 
   return (
     <>
-      <button
-        type="button"
+      <Button
+        variant="secondary"
         onClick={() => setShowModal(true)}
-        className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        className="w-full"
       >
+        <UserPlus className="mr-2 h-4 w-4" />
         멤버 추가
-      </button>
+      </Button>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-              onClick={() => setShowModal(false)}
-            />
-
-            <div className="inline-block transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 sm:align-middle">
-              <form onSubmit={handleSubmit}>
-                <div>
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">
-                    새 멤버 추가
-                  </h3>
-                  <div className="mt-2">
-                    <div className="space-y-4">
-                      <div>
-                        <label
-                          htmlFor="email"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          이메일
-                        </label>
-                        <input
-                          type="email"
-                          name="email"
-                          id="email"
-                          required
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="tistoryBlog"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Tistory 블로그 URL
-                        </label>
-                        <input
-                          type="url"
-                          name="tistoryBlog"
-                          id="tistoryBlog"
-                          required
-                          placeholder="https://your-blog.tistory.com"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          value={tistoryBlog}
-                          onChange={(e) => setTistoryBlog(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="folderPath"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          저장 폴더 경로
-                        </label>
-                        <input
-                          type="text"
-                          name="folderPath"
-                          id="folderPath"
-                          required
-                          placeholder="docs/summaries/member-name"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          value={folderPath}
-                          onChange={(e) => setFolderPath(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:col-start-2 sm:text-sm"
-                  >
-                    {loading ? '추가 중...' : '추가'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:col-start-1 sm:mt-0 sm:text-sm"
-                  >
-                    취소
-                  </button>
-                </div>
-              </form>
-            </div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4">새로운 멤버 추가</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  이메일
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  티스토리 블로그 URL
+                </label>
+                <input
+                  type="url"
+                  value={tistoryBlog}
+                  onChange={(e) => setTistoryBlog(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  폴더 경로
+                </label>
+                <input
+                  type="text"
+                  value={folderPath}
+                  onChange={(e) => setFolderPath(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-3 mt-6">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setShowModal(false)}
+                >
+                  취소
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? '추가 중...' : '추가하기'}
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}
