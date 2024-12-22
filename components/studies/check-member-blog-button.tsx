@@ -2,12 +2,13 @@ import { Button } from "@/components/ui/button"
 import { RefreshCw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
-interface CheckBlogButtonProps {
+interface CheckMemberBlogButtonProps {
   studyId: string
+  memberId: string
   onSuccess?: () => void
 }
 
-export function CheckBlogButton({ studyId, onSuccess }: CheckBlogButtonProps) {
+export function CheckMemberBlogButton({ studyId, memberId, onSuccess }: CheckMemberBlogButtonProps) {
   const { toast } = useToast()
 
   const handleClick = async () => {
@@ -19,6 +20,7 @@ export function CheckBlogButton({ studyId, onSuccess }: CheckBlogButtonProps) {
         },
         body: JSON.stringify({
           studyId,
+          memberId,
         }),
       })
 
@@ -28,7 +30,7 @@ export function CheckBlogButton({ studyId, onSuccess }: CheckBlogButtonProps) {
 
       toast({
         title: "블로그 확인 완료",
-        description: "스터디 멤버들의 블로그를 확인했습니다.",
+        description: "블로그 포스트를 확인했습니다.",
       })
 
       onSuccess?.()
@@ -43,9 +45,12 @@ export function CheckBlogButton({ studyId, onSuccess }: CheckBlogButtonProps) {
   }
 
   return (
-    <Button onClick={handleClick}>
-      <RefreshCw className="mr-2 h-4 w-4" />
-      블로그 확인
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={handleClick}
+    >
+      <RefreshCw className="h-4 w-4" />
     </Button>
   )
 }
