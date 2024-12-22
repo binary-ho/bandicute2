@@ -45,38 +45,42 @@ export function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
-          <span className="font-bold">Bandicute</span>
-        </Link>
+    <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/50">
+      <div className="max-w-[1440px] mx-auto flex h-16 items-center px-4">
+        <div className="flex-shrink-0 -ml-2">
+          <Link href="/" className="flex items-center space-x-2">
+            <span className="font-bold text-gray-900">Bandicute</span>
+          </Link>
+        </div>
 
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="flex flex-1 items-center justify-end">
           {member ? (
             <>
               {/* 스터디 버튼 */}
               <Button variant="ghost" asChild>
                 <Link href="/studies">
-                  <BookOpen className="mr-2 h-4 w-4" />
-                  스터디
+                  <BookOpen className="mr-2 h-4 w-4 text-gray-600" />
+                  <span className="text-gray-600">스터디</span>
                 </Link>
               </Button>
               {/* 프로필 버튼 */}
               <Button variant="ghost" asChild>
                 <Link href="/profile">
-                  <User className="mr-2 h-4 w-4" />
-                  프로필
+                  <User className="mr-2 h-4 w-4 text-gray-600" />
+                  <span className="text-gray-600">프로필</span>
                 </Link>
               </Button>
               {/* 로그아웃 버튼 */}
               <Button variant="ghost" onClick={handleSignOut}>
-                <LogOut className="mr-2 h-4 w-4" />
-                로그아웃
+                <LogOut className="mr-2 h-4 w-4 text-gray-600" />
+                <span className="text-gray-600">로그아웃</span>
               </Button>
             </>
           ) : (
             <Button variant="ghost" asChild>
-              <Link href="/auth/signin">로그인</Link>
+              <Link href="/auth/signin">
+                <span className="text-gray-600">로그인</span>
+              </Link>
             </Button>
           )}
         </div>

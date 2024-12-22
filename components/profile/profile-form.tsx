@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import type { Member } from '@/types';
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export function ProfileForm() {
   const [member, setMember] = useState<Member | null>(null);
@@ -16,11 +19,9 @@ export function ProfileForm() {
   useEffect(() => {
     async function fetchProfile() {
       try {
-        // 1. 현재 인증된 사용자 가져오기
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // 2. auth_accounts를 통해 member_id 가져오기
         const { data: authAccount, error: authError } = await supabase
           .from('auth_accounts')
           .select('member_id')
@@ -30,7 +31,6 @@ export function ProfileForm() {
         if (authError) throw authError;
         if (!authAccount) throw new Error('Member not found');
 
-        // 3. members 테이블에서 사용자 정보 가져오기
         const { data, error } = await supabase
           .from('members')
           .select('*')
@@ -64,11 +64,9 @@ export function ProfileForm() {
     setSaving(true);
 
     try {
-      // 1. 현재 인증된 사용자 가져오기
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not found');
 
-      // 2. auth_accounts를 통해 member_id 가져오기
       const { data: authAccount, error: authError } = await supabase
         .from('auth_accounts')
         .select('member_id')
@@ -84,7 +82,6 @@ export function ProfileForm() {
         updated_at: new Date().toISOString(),
       };
 
-      // 3. members 테이블 업데이트
       const { error: updateError } = await supabase
         .from('members')
         .update(updates)
@@ -114,51 +111,31 @@ export function ProfileForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700"
-        >
-          이름
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="name">이름</Label>
+        <Input
           type="text"
-          name="name"
           id="name"
           required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
       </div>
 
-      <div>
-        <label
-          htmlFor="tistoryBlog"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Tistory 블로그 URL
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="tistoryBlog">Tistory 블로그 URL</Label>
+        <Input
           type="url"
-          name="tistoryBlog"
           id="tistoryBlog"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           placeholder="https://your-blog.tistory.com"
           value={tistoryBlog}
           onChange={(e) => setTistoryBlog(e.target.value)}
         />
       </div>
 
-      <div>
-        <button
-          type="submit"
-          disabled={saving}
-          className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-        >
-          {saving ? '저장 중...' : '저장'}
-        </button>
-      </div>
+      <Button type="submit" disabled={saving} className="w-full">
+        {saving ? '저장 중...' : '저장'}
+      </Button>
     </form>
   );
 }
