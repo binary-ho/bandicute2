@@ -24,6 +24,7 @@ export interface AuthState {
   member: Member | null;
   loading: boolean;
   error: Error | null;
+  initialized: boolean;
   fetchUser: () => Promise<void>;
   reset: () => void;
 }
