@@ -1,41 +1,31 @@
-import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "./globals.css";
-import { Navbar } from "@/components/layout/navbar";
-import { RootLayoutClient } from "@/components/layout/root-layout-client";
-import { Toaster } from "@/components/ui/toaster";
+import { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import { Toaster } from "@/components/ui/toaster"
+import { Navbar } from '@/components/layout/navbar'
+import './globals.css'
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-});
-
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-});
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
-  title: "Bandicute",
-  description: "반디큐트",
+  title: "Bandicute | 반디큐트",
+  description: "반디큐트에서 함께 성장하는 스터디 경험을 만나보세요.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="min-h-screen bg-background font-sans antialiased">
-        <div className="relative flex min-h-screen flex-col">
+    <html lang="ko" className={inter.className}>
+      <body className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 font-sans antialiased">
+        <div className="relative flex min-h-screen flex-col max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Navbar />
-          <main className="flex-1 pt-16">
-            <RootLayoutClient>{children}</RootLayoutClient>
+          <main className="flex-1 pt-20">
+            {children}
           </main>
         </div>
-        <Toaster />
+        <Toaster className="z-50" />
       </body>
     </html>
-  );
+  )
 }

@@ -5,19 +5,26 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/store/auth';
 import { supabase } from '@/lib/supabase/client';
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { LogOut, User, BookOpen } from 'lucide-react';
+import React from 'react';
 
 export function Navbar() {
-  const { member } = useAuth();
+  const { member, fetchUser } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const reset = useAuth(state => state.reset);
+
+  // 컴포넌트 마운트 시 사용자 정보 가져오기
+  React.useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
-      // 먼저 상태를 리셋
       reset();
 
       toast({
@@ -30,54 +37,48 @@ export function Navbar() {
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
-        variant: "destructive",
         title: "로그아웃 실패",
-        description: error instanceof Error ? error.message : '로그아웃 중 오류가 발생했습니다.',
+        description: "다시 시도해주세요.",
+        variant: "destructive",
       });
     }
   };
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center px-4">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
-          <span className="hidden font-bold sm:inline-block">Bandicute</span>
+          <span className="font-bold">Bandicute</span>
         </Link>
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-            {/* 검색 기능이 필요하다면 여기에 추가 */}
-          </div>
-          <nav className="flex items-center space-x-4">
-            {member ? (
-              <>
-                <Link
-                  href="/studies"
-                  className="text-sm font-medium hover:text-primary"
-                >
+
+        <div className="flex flex-1 items-center justify-end space-x-2">
+          {member ? (
+            <>
+              {/* 스터디 버튼 */}
+              <Button variant="ghost" asChild>
+                <Link href="/studies">
+                  <BookOpen className="mr-2 h-4 w-4" />
                   스터디
                 </Link>
-                <Link
-                  href="/profile"
-                  className="text-sm font-medium hover:text-primary"
-                >
+              </Button>
+              {/* 프로필 버튼 */}
+              <Button variant="ghost" asChild>
+                <Link href="/profile">
+                  <User className="mr-2 h-4 w-4" />
                   프로필
                 </Link>
-                <button
-                  onClick={handleSignOut}
-                  className="text-sm font-medium text-destructive hover:text-destructive/80"
-                >
-                  로그아웃
-                </button>
-              </>
-            ) : (
-              <Link
-                href="/auth/signin"
-                className="text-sm font-medium hover:text-primary"
-              >
-                로그인
-              </Link>
-            )}
-          </nav>
+              </Button>
+              {/* 로그아웃 버튼 */}
+              <Button variant="ghost" onClick={handleSignOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                로그아웃
+              </Button>
+            </>
+          ) : (
+            <Button variant="ghost" asChild>
+              <Link href="/auth/signin">로그인</Link>
+            </Button>
+          )}
         </div>
       </div>
     </nav>
