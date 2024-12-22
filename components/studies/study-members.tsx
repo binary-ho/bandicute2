@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { CheckBlogButton } from './check-blog-button';
+import { CheckMemberBlogButton } from './check-member-blog-button';
 import { useToast } from '@/hooks/use-toast';
 import type { Member } from '@/types';
 
@@ -69,7 +70,7 @@ export function StudyMembers({ studyId }: StudyMembersProps) {
             각 멤버의 블로그를 개별적으로 체크하거나, 전체 멤버의 블로그를 한 번에 체크할 수 있습니다.
           </p>
         </div>
-        <CheckBlogButton studyId={studyId} variant="secondary" />
+        <CheckBlogButton studyId={studyId} />
       </div>
       <div className="flow-root">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -128,11 +129,9 @@ export function StudyMembers({ studyId }: StudyMembersProps) {
                         )}
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        <CheckBlogButton
+                        <CheckMemberBlogButton
                           studyId={studyId}
                           memberId={member.id}
-                          member={member}
-                          variant="outline"
                         />
                       </td>
                     </tr>
