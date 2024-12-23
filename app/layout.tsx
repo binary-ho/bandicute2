@@ -10,8 +10,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Bandicute | 반디큐트",
-  description: "반디큐트에서 함께 성장하는 스터디 경험을 만나보세요.",
+  title: "Bandicute | 반디기웃",
+  description: "반디기웃에서 함께 성장하는 스터디 경험을 만나보세요.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

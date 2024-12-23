@@ -80,8 +80,8 @@ export function AuthForm({ type }: AuthFormProps) {
         <CardTitle>{type === 'signin' ? '로그인' : '회원가입'}</CardTitle>
         <CardDescription>
           {type === 'signin' 
-            ? '반디큐트에 오신 것을 환영합니다.' 
-            : '새로운 계정을 만들어 반디큐트를 시작하세요.'}
+            ? '반디기웃에 오신 것을 환영합니다.' 
+            : '새로운 계정을 만들어 반디기웃를 시작하세요.'}
         </CardDescription>
       </CardHeader>
       <CardContent>

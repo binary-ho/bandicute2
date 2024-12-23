@@ -7,7 +7,7 @@ export default function SignUpPage() {
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">회원가입</CardTitle>
         <CardDescription className="text-center">
-          새로운 계정을 만들어 반디큐트를 시작하세요.
+          새로운 계정을 만들어 반디기웃를 시작하세요.
         </CardDescription>
       </CardHeader>
       <CardContent>
