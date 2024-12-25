@@ -164,16 +164,29 @@ export class BlogSummaryService {
         throw error;
       }
 
-      // 6. Update pull_requsted
+      // 6. Insert pull_requstes
+      const { error: insertError } = await supabase
+        .from('pull_requests')
+        .insert({
+          blog_post_id: savedPost.id,
+          study_id: study.id,
+          pr_url: prUrl,
+        });
+
+      if (insertError) {
+        throw insertError;
+      }
+
+      // 7. Update is_pull_requsted
       const { error: updateError } = await supabase
         .from('blog_posts')
         .update({ is_pull_requested: true })
         .eq('id', savedPost.id);
-
+      
       if (updateError) {
         throw updateError;
       }
-
+      
       return savedPost;
     } catch (error) {
       console.error('Failed to process blog post:', error);
