@@ -19,6 +19,7 @@ export class OpenAIService {
       // 컨텐츠 길이 제한
       const truncatedPrompt = this.truncateContent(prompt);
 
+      // TODO: content에 템플릿을 넣고, content에 진짜 blog content를 넣도록 변경
       const response = await this.openai.chat.completions.create({
         model: 'gpt-4',
         messages: [
@@ -32,7 +33,7 @@ export class OpenAIService {
           },
         ],
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 1000,
       });
 
       return response.choices[0]?.message?.content || '요약을 생성할 수 없습니다.';

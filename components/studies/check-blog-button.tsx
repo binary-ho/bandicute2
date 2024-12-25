@@ -11,7 +11,7 @@ export function CheckBlogButton({ studyId }: CheckBlogButtonProps) {
 
   const handleClick = async () => {
     try {
-      const response = await fetch(`/api/cron/check-blogs`, {
+      const response = await fetch(`/api/blogs`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
