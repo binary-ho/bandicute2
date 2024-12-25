@@ -3,7 +3,6 @@ import { OpenAIService } from '../openai/service';
 import { GitHubPRService } from '../github/pr-service';
 import fs from 'fs';
 import path from 'path';
-import { load } from 'cheerio';
 import { XMLParser } from 'fast-xml-parser';
 import type { BlogPost, Member, Study } from '@/types';
 import { parseBlogPost } from '../tistory/parser';
@@ -113,11 +112,6 @@ export class BlogSummaryService {
     };
   }
 
-  private stripHtml(html: string): string {
-    const $ = load(html);
-    return $.text().trim();
-  }
-
   async processNewBlogPost(url: string, member: Member, study: Study): Promise<BlogPost> {
     try {
       // 1. Parse blog post
@@ -131,14 +125,30 @@ export class BlogSummaryService {
         .single();
 
       if (existingPost) {
-        throw new Error('이미 처리된 블로그 포스트입니다.');
+        throw new Error('이미 파싱된 블로그 포스트입니다.');
       }
 
       // 3. Generate summary
       const prompt = await this.generateSummaryPrompt(parsedPost);
       const summary = await this.openAIService.generateSummary(prompt);
 
-      // 4. Create PR
+      // 4. Save to database
+      const { data: savedPost, error } = await supabase
+        .from('blog_posts')
+        .insert({
+          member_id: member.id,
+          title: parsedPost.title,
+          url: parsedPost.url,
+          content: parsedPost.content,
+          summary,
+          is_pull_requested: false,
+          published_at: parsedPost.publishedAt.toISOString(),
+          guid: parsedPost.guid,
+        })
+        .select()
+        .single();
+
+      // 5. Create PR
       const { body: prBody } = await this.generatePRDescription(parsedPost, member, summary);
       const prUrl = await this.githubPRService.createPR({
         post: {
@@ -150,26 +160,33 @@ export class BlogSummaryService {
         description: prBody,
       });
 
-      // 5. Save to database
-      const { data: savedPost, error } = await supabase
-        .from('blog_posts')
-        .insert({
-          member_id: member.id,
-          title: parsedPost.title,
-          url: parsedPost.url,
-          content: parsedPost.content,
-          summary,
-          pr_url: prUrl,
-          published_at: parsedPost.publishedAt.toISOString(),
-          guid: parsedPost.guid,
-        })
-        .select()
-        .single();
-
-      if (error) {
+      if (error || !prUrl) {
         throw error;
       }
 
+      // 6. Insert pull_requstes
+      const { error: insertError } = await supabase
+        .from('pull_requests')
+        .insert({
+          blog_post_id: savedPost.id,
+          study_id: study.id,
+          pr_url: prUrl,
+        });
+
+      if (insertError) {
+        throw insertError;
+      }
+
+      // 7. Update is_pull_requsted
+      const { error: updateError } = await supabase
+        .from('blog_posts')
+        .update({ is_pull_requested: true })
+        .eq('id', savedPost.id);
+      
+      if (updateError) {
+        throw updateError;
+      }
+      
       return savedPost;
     } catch (error) {
       console.error('Failed to process blog post:', error);

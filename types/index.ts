@@ -36,7 +36,8 @@ export interface BlogPost {
   url: string;
   content: string;
   summary: string | null;
-  pr_url: string | null;
+  // TODO: 추후 PR 이력 관리 추가
+  is_pull_requested: boolean | null;
   published_at: string;
   guid: string;
   created_at: string;
