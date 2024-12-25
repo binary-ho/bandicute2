@@ -112,27 +112,13 @@ export class BlogSummaryService {
     };
   }
 
-  async processNewBlogPost(url: string, member: Member, study: Study): Promise<BlogPost> {
+  async processNewBlogPost(
+    parsedPost: ParsedBlogPost,
+    study: Study,
+    member: Member,
+  ): Promise<BlogPost> {
     try {
-      // 1. Parse blog post
-      const parsedPost = await this.parseBlogPost(url);
-
-      // 2. Check if post already exists
-      const { data: existingPost } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('guid', parsedPost.guid)
-        .single();
-
-      if (existingPost) {
-        throw new Error('이미 파싱된 블로그 포스트입니다.');
-      }
-
-      // 3. Generate summary
-      const prompt = await this.generateSummaryPrompt(parsedPost);
-      const summary = await this.openAIService.generateSummary(prompt);
-
-      // 4. Save to database
+      // 1. Save blog post
       const { data: savedPost, error } = await supabase
         .from('blog_posts')
         .insert({
@@ -140,57 +126,125 @@ export class BlogSummaryService {
           title: parsedPost.title,
           url: parsedPost.url,
           content: parsedPost.content,
-          summary,
-          is_pull_requested: false,
           published_at: parsedPost.publishedAt.toISOString(),
           guid: parsedPost.guid,
         })
         .select()
         .single();
 
-      // 5. Create PR
-      const { body: prBody } = await this.generatePRDescription(parsedPost, member, summary);
+      if (error) {
+        throw error;
+      }
+
+      // 2. Create empty post summary
+      const { error: summaryError } = await supabase
+        .from('post_summaries')
+        .insert([{
+          blog_post_id: savedPost.id,
+          summary: '',
+          is_summarized: false,
+        }, { ignoreDuplicates: true }]);
+
+      if (summaryError) {
+        throw summaryError;
+      }
+
+      // 3. Create empty pull request
+      const { error: prError } = await supabase
+        .from('pull_requests')
+        .insert([{
+          blog_post_id: savedPost.id,
+          study_id: study.id,
+          is_opened: false,
+          pr_url: null,
+        }, { ignoreDuplicates: true }]);
+
+      if (prError) {
+        throw prError;
+      }
+
+      // 4. Generate summary with GPT
+      const summaryPrompt = await this.loadTemplate<SummaryPromptTemplate>('summary-prompt');
+      const prompt = this.replaceTemplateVars(summaryPrompt.template, {
+        title: parsedPost.title,
+        content: parsedPost.content,
+      });
+
+      const summary = await this.openAIService.generateSummary(prompt);
+
+      // 5. Update summary
+      const { error: updateSummaryError } = await supabase
+        .from('post_summaries')
+        .update({ 
+          summary,
+          is_summarized: true,
+        })
+        .eq('blog_post_id', savedPost.id);
+
+      if (updateSummaryError) {
+        throw updateSummaryError;
+      }
+
+      // 6. Generate PR content
+      const prTemplate = await this.loadTemplate<PRTemplate>('pr-template');
+      const prBody = this.generatePRBody(prTemplate, {
+        title: parsedPost.title,
+        url: parsedPost.url,
+        summary,
+        publishedAt: parsedPost.publishedAt.toISOString(),
+      });
+
+      // 7. Create PR
       const prUrl = await this.githubPRService.createPR({
-        post: {
-          ...parsedPost,
-          published_at: parsedPost.publishedAt.toISOString(),
-        },
+        post: savedPost,
         study,
         member,
         description: prBody,
       });
 
-      if (error || !prUrl) {
-        throw error;
-      }
-
-      // 6. Insert pull_requstes
-      const { error: insertError } = await supabase
+      // 8. Update pull request
+      const { error: updatePRError } = await supabase
         .from('pull_requests')
-        .insert({
-          blog_post_id: savedPost.id,
-          study_id: study.id,
+        .update({ 
           pr_url: prUrl,
-        });
+          is_opened: true,
+        })
+        .eq('blog_post_id', savedPost.id)
+        .eq('study_id', study.id);
 
-      if (insertError) {
-        throw insertError;
+      if (updatePRError) {
+        throw updatePRError;
       }
 
-      // 7. Update is_pull_requsted
-      const { error: updateError } = await supabase
-        .from('blog_posts')
-        .update({ is_pull_requested: true })
-        .eq('id', savedPost.id);
-      
-      if (updateError) {
-        throw updateError;
-      }
-      
       return savedPost;
     } catch (error) {
       console.error('Failed to process blog post:', error);
       throw error;
     }
+  }
+
+  private generatePRBody(template: PRTemplate, vars: Record<string, string>): string {
+    const sections = template.body.map(section => {
+      if (section.content) {
+        section.content = this.replaceTemplateVars(section.content, vars);
+      }
+      if (section.items) {
+        section.items = section.items.map(item => this.replaceTemplateVars(item, vars));
+      }
+      
+      let sectionText = '';
+      if (section.title) {
+        sectionText += `## ${section.title}\n\n`;
+      }
+      if (section.content) {
+        sectionText += `${section.content}\n\n`;
+      }
+      if (section.items) {
+        sectionText += section.items.map(item => `- ${item}`).join('\n') + '\n\n';
+      }
+      return sectionText;
+    });
+
+    return sections.join('');
   }
 }

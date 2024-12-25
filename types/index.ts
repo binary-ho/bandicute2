@@ -35,12 +35,28 @@ export interface BlogPost {
   title: string;
   url: string;
   content: string;
-  summary: string | null;
-  // TODO: 추후 PR 이력 관리 추가
-  is_pull_requested: boolean | null;
   published_at: string;
   guid: string;
   created_at: string;
   updated_at: string;
   member?: Member;
+}
+
+export interface PostSummary {
+  id: string;
+  blog_post_id: string;
+  summary: string;
+  is_summarized: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PullRequest {
+  id: string;
+  blog_post_id: string;
+  study_id: string;
+  is_opened: boolean;
+  pr_url: string | null;
+  created_at: string;
+  updated_at: string;
 }
