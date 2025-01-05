@@ -42,7 +42,7 @@ export function ProfileForm() {
         if (data) {
           // setMember(data);
           setName(data.name || '');
-          setTistoryBlog(data.tistory_blog || '');
+          setTistoryBlog(data.blog_url || '');
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -78,7 +78,7 @@ export function ProfileForm() {
 
       const updates = {
         name,
-        tistory_blog: tistoryBlog,
+        blog_url: tistoryBlog,
         updated_at: new Date().toISOString(),
       };
 

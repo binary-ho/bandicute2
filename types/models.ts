@@ -1,8 +1,8 @@
 export interface Member {
   id: string;
-  name: string;
   email: string;
-  blog_url: string | null;
+  name: string;
+  blog_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -10,7 +10,7 @@ export interface Member {
 export interface Study {
   id: string;
   title: string;
-  description: string | null;
+  description: string;
   github_repo: string;
   branch: string;
   directory: string;
@@ -22,41 +22,25 @@ export interface StudyMember {
   id: string;
   study_id: string;
   member_id: string;
-  folder_path: string;
   is_leader: boolean;
+  folder_path?: string;
   created_at: string;
   updated_at: string;
-  member?: Member;
+  members?: Member;
 }
 
 export interface BlogPost {
-  id: string;
-  member_id: string;
   title: string;
   url: string;
   content: string;
-  published_at: string;
-  guid: string;
-  created_at: string;
-  updated_at: string;
-  member?: Member;
+  publishedAt: string;
 }
 
-export interface PostSummary {
+export interface AuthAccount {
   id: string;
-  blog_post_id: string;
-  summary: string;
-  is_summarized: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface PullRequest {
-  id: string;
-  blog_post_id: string;
-  study_id: string;
-  is_opened: boolean;
-  pr_url: string | null;
+  provider: string;
+  provider_id: string;
+  member_id: string;
   created_at: string;
   updated_at: string;
 }

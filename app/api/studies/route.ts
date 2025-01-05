@@ -82,9 +82,9 @@ export async function POST(request: Request) {
       .eq('id', user.id)
       .single();
 
-    if (member?.tistory_blog) {
+    if (member?.blog_url) {
       try {
-        await blogSummaryService.processNewBlogPost(member.tistory_blog, member, study);
+        await blogSummaryService.processNewBlogPost(member.blog_url, member, study);
       } catch (error) {
         console.error('Error processing blog post:', error);
         // 블로그 처리 실패해도 스터디 생성은 성공으로 처리

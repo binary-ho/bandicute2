@@ -115,14 +115,14 @@ export function StudyMembers({ studyId }: StudyMembersProps) {
                         {member.email}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {member.tistory_blog ? (
+                        {member.blog_url ? (
                           <a
-                            href={member.tistory_blog}
+                            href={member.blog_url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-indigo-600 hover:text-indigo-900"
                           >
-                            {member.tistory_blog}
+                            {member.blog_url}
                           </a>
                         ) : (
                           '등록된 블로그가 없습니다'

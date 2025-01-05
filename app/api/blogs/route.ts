@@ -126,7 +126,7 @@ export async function POST(request: Request) {
 
     const results = await Promise.all(
       targetMembers.map(async (member) => {
-        if (!member.tistory_blog) {
+        if (!member.blog_url) {
           return {
             memberId: member.id,
             success: false,
@@ -135,7 +135,7 @@ export async function POST(request: Request) {
         }
 
         try {
-          const post = await blogSummaryService.processNewBlogPost(member.tistory_blog, member, study);
+          const post = await blogSummaryService.processNewBlogPost(member.blog_url, member, study);
           return {
             memberId: member.id,
             success: true,

@@ -4,7 +4,7 @@ export interface Member {
   id: string;
   email: string;
   name: string;
-  tistory_blog?: string;
+  blog_url?: string;
   created_at: string;
   updated_at: string;
 }
