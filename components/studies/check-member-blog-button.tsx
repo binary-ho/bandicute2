@@ -3,24 +3,19 @@ import { RefreshCw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface CheckMemberBlogButtonProps {
-  studyId: string
   memberId: string
 }
 
-export function CheckMemberBlogButton({ studyId, memberId }: CheckMemberBlogButtonProps) {
+export function CheckMemberBlogButton({ memberId }: CheckMemberBlogButtonProps) {
   const { toast } = useToast()
 
   const handleClick = async () => {
     try {
-      const response = await fetch(`/api/blogs`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/members/${memberId}/posts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          studyId,
-          memberId,
-        }),
       })
 
       if (!response.ok) {

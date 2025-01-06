@@ -11,14 +11,11 @@ export function CheckBlogButton({ studyId }: CheckBlogButtonProps) {
 
   const handleClick = async () => {
     try {
-      const response = await fetch(`/api/blogs`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/studies/${studyId}/posts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          studyId,
-        }),
       })
 
       if (!response.ok) {
