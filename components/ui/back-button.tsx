@@ -13,9 +13,8 @@ interface BackButtonProps {
 }
 
 export function BackButton({
-  className,
   variant = 'ghost',
-  size = 'default',
+  size = 'lg',
   onClick,
 }: BackButtonProps) {
   const router = useRouter()
@@ -34,12 +33,12 @@ export function BackButton({
       size={size}
       className={cn(
         'flex items-center gap-1 hover:bg-gray-100/80',
-        className
+        "ml-[-2.5rem] mt-3"
       )}
       onClick={handleClick}
       aria-label="뒤로 가기"
     >
-      <ChevronLeft className="h-4 w-4" />
+      <ChevronLeft className="h-7 w-7" />
       <span className="sr-only">뒤로 가기</span>
     </Button>
   )
