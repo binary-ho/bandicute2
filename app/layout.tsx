@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Toaster } from "@/components/ui/toaster"
 import { Navbar } from '@/components/layout/navbar'
+import { PageContainer } from '@/components/layout/page-container'
 import './globals.css'
 
 const inter = Inter({
@@ -22,7 +23,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
           <Navbar />
           <main className="flex-1">
-            {children}
+            <PageContainer>
+              {children}
+            </PageContainer>
           </main>
           <Toaster />
         </div>
