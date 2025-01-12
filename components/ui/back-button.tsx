@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { Button } from './button'
 import { ChevronLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -10,6 +10,7 @@ interface BackButtonProps {
   variant?: 'default' | 'ghost'
   size?: 'default' | 'sm' | 'lg'
   onClick?: () => void
+  fallbackPath?: string
 }
 
 export function BackButton({
@@ -18,13 +19,16 @@ export function BackButton({
   onClick,
 }: BackButtonProps) {
   const router = useRouter()
+  const pathname = usePathname()
 
   const handleClick = () => {
     if (onClick) {
       onClick()
       return
     }
-    router.back()
+
+    const parentPath = getParentPath(pathname)
+    router.push(parentPath)
   }
 
   return (
@@ -42,4 +46,13 @@ export function BackButton({
       <span className="sr-only">뒤로 가기</span>
     </Button>
   )
+}
+
+function getParentPath(pathname: string): string {
+  const basePath = '/'
+  const pathSegments = pathname.split('/').filter(Boolean)
+  if (pathSegments.length <= 1) {
+    return basePath
+  }
+  return basePath + pathSegments.slice(0, -1).join('/')
 }
