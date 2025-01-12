@@ -1,6 +1,7 @@
 import { StudyDetails } from '@/components/studies/study-details';
 import { StudyMembers } from '@/components/studies/study-members';
 import { AddMemberButton } from '@/components/studies/add-member-button';
+import { BackButton } from '@/components/ui/back-button';
 
 interface StudyPageProps {
   params: {
@@ -11,6 +12,7 @@ interface StudyPageProps {
 export default function StudyPage({ params }: StudyPageProps) {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <BackButton />
       <div className="py-10">
         <StudyDetails studyId={params.id} />
         <div className="mt-10">
