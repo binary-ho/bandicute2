@@ -16,7 +16,6 @@ export function Navbar() {
   const router = useRouter();
   const reset = useAuth(state => state.reset);
 
-  // 컴포넌트 마운트 시 사용자 정보 가져오기
   React.useEffect(() => {
     fetchUser();
   }, [fetchUser]);
@@ -47,8 +46,8 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/50">
-      <div className="max-w-[1440px] mx-auto flex h-16 items-center px-4">
-        <div className="flex-shrink-0 -ml-2">
+      <div className="max-w-[1440px] mx-auto flex h-16 items-center px-4 sm:px-6 lg:px-8">
+        <div className="flex-shrink-0">
           <Link href="/" className="flex items-center space-x-2">
             <span className="font-bold text-gray-900">Bandicute</span>
           </Link>
